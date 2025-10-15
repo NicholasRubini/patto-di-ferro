@@ -10,7 +10,7 @@
   <style>
     :root { --bg:#020617; }
     body { background: var(--bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    input, textarea, button { font-size: 16px; } /* evita lo zoom iOS */
+    input, textarea, button { font-size: 16px; } /* evita zoom iOS */
   </style>
 </head>
 <body class="text-white">
@@ -69,6 +69,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span class="text-base">Condividi / Scarica</span>
           </button>
+
           <button id="copyBtn"
                   class="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled>
@@ -96,6 +97,8 @@
   <script>
     // ---------- Stato & riferimenti ----------
     const BASE_W = 1080, BASE_H = 1920;
+    const SAFE_TOP = 300, SAFE_BOTTOM = 1700; // Safe area Instagram Stories
+
     const nameEl = document.getElementById('name');
     const goalEl = document.getElementById('goal');
     const dateEl = document.getElementById('date');
@@ -161,10 +164,7 @@
       const ctx = off.getContext('2d');
       ctx.scale(s, s);
 
-      // Attendi i font
-      if (document.fonts && document.fonts.ready) {
-        try { await document.fonts.ready; } catch(e){}
-      }
+      if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
 
       // BG
       const bg = ctx.createLinearGradient(0,0,0,BASE_H);
@@ -188,41 +188,52 @@
       ctx.fillStyle = metal; ctx.fillRect(0,0,BASE_W,10);
       ctx.fillStyle = '#3b82f6'; ctx.fillRect(0,10,BASE_W,4);
 
+      // --- SAFE AREA LAYOUT ---
+      const titleY = SAFE_TOP;                    // 300
+      const arrowsY1 = titleY - 20, arrowsY2 = titleY + 20;
+      const dividerY = titleY + 50;               // ~350
+      const nameY = titleY + 140;                 // 440
+      const headingY = (userName.trim() ? titleY + 260 : titleY + 200); // 560 / 500
+      const goalStartY = (userName.trim() ? titleY + 390 : titleY + 330); // 690 / 630
+
       // Titolo
       ctx.shadowColor = 'rgba(59,130,246,0.8)'; ctx.shadowBlur = 30;
       ctx.fillStyle = '#e6e6fa'; ctx.textAlign = 'center';
       ctx.font = '800 96px Oswald, Arial';
-      ctx.fillText('PATTO DI FERRO', BASE_W/2, 220);
+      ctx.fillText('PATTO DI FERRO', BASE_W/2, titleY);
       ctx.shadowBlur = 0;
 
-      // Frecce
+      // Frecce vicino al titolo (riposizionate)
       ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 3; ctx.lineCap='square';
-      ctx.beginPath(); ctx.moveTo(120,200); ctx.lineTo(120,240); ctx.moveTo(105,210); ctx.lineTo(120,200); ctx.lineTo(135,210); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(940,200); ctx.lineTo(960,220); ctx.lineTo(940,240); ctx.moveTo(960,200); ctx.lineTo(940,220); ctx.lineTo(960,240); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(120, arrowsY1); ctx.lineTo(120, arrowsY2);
+      ctx.moveTo(105, arrowsY1+10); ctx.lineTo(120, arrowsY1); ctx.lineTo(135, arrowsY1+10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(940, arrowsY1); ctx.lineTo(960, titleY); ctx.lineTo(940, arrowsY2);
+      ctx.moveTo(960, arrowsY1); ctx.lineTo(940, titleY); ctx.lineTo(960, arrowsY2); ctx.stroke();
 
       // Divider
       const lineG = ctx.createLinearGradient(290,0,790,0);
       lineG.addColorStop(0,'rgba(59,130,246,0)'); lineG.addColorStop(0.5,'#3b82f6'); lineG.addColorStop(1,'rgba(59,130,246,0)');
-      ctx.fillStyle = lineG; ctx.fillRect(290,250,500,5);
+      ctx.fillStyle = lineG; ctx.fillRect(290, dividerY, 500, 5);
 
       // Nome opzionale
       if (userName.trim()){
         ctx.shadowColor = 'rgba(59,130,246,0.6)'; ctx.shadowBlur = 20;
         ctx.fillStyle = '#a5b4fc'; ctx.font = '700 52px Inter, Arial';
-        ctx.fillText(userName.toUpperCase(), BASE_W/2, 360);
+        ctx.fillText(userName.toUpperCase(), BASE_W/2, nameY);
         ctx.shadowBlur = 0;
       }
 
       // Heading
       ctx.fillStyle = '#60a5fa'; ctx.font = '800 48px Inter, Arial';
-      ctx.fillText('IL MIO OBIETTIVO:', BASE_W/2, userName?480:420);
-      ctx.fillStyle = 'rgba(96,165,250,0.3)'; ctx.fillRect(240, userName?505:445, 600, 2);
+      ctx.fillText('IL MIO OBIETTIVO:', BASE_W/2, headingY);
+      ctx.fillStyle = 'rgba(96,165,250,0.3)'; ctx.fillRect(240, headingY+25, 600, 2);
 
       // Goal autosize & wrap
       ctx.shadowColor = 'rgba(230,230,250,0.5)'; ctx.shadowBlur = 15; ctx.fillStyle='#f1f5f9';
       const fit = fitAndWrap(ctx, goal, 900, 5, 76, 38, 95);
       ctx.font = `800 ${fit.size}px Inter, Arial`;
-      let y = userName ? 610 : 550; const lh = Math.max(80, Math.round(fit.size*1.25));
+      let y = goalStartY;
+      const lh = Math.max(80, Math.round(fit.size*1.25));
       for (const ln of fit.lines){ ctx.fillText(ln, BASE_W/2, y); y += lh; }
       ctx.shadowBlur = 0;
 
@@ -241,8 +252,11 @@
       ctx.shadowColor = 'rgba(96,165,250,0.8)'; ctx.shadowBlur = 20; ctx.fillStyle='#e0e7ff'; ctx.font='800 62px Inter, Arial';
       ctx.fillText(formatted, BASE_W/2, boxY+155); ctx.shadowBlur = 0;
 
-      // Badge
-      const badgeY = 1580, hex = 140;
+      // Badge: si posiziona sotto la box data, ma resta nella safe area
+      const hex = 140;
+      const desiredBadgeY = boxY + 360;                         // sotto la box
+      const badgeY = Math.min(SAFE_BOTTOM - (hex - 20), desiredBadgeY); // cap in safe area
+
       ctx.beginPath(); for(let i=0;i<6;i++){ const a=(Math.PI/3)*i, x=BASE_W/2+hex*Math.cos(a), yy=badgeY+hex*Math.sin(a); i?ctx.lineTo(x,yy):ctx.moveTo(x,yy); } ctx.closePath();
       const hexG = ctx.createRadialGradient(BASE_W/2,badgeY,0,BASE_W/2,badgeY,hex); hexG.addColorStop(0,'rgba(30,58,138,0.6)'); hexG.addColorStop(1,'rgba(15,23,42,0.8)');
       ctx.fillStyle = hexG; ctx.fill(); ctx.strokeStyle='#3b82f6'; ctx.lineWidth=5; ctx.stroke();
@@ -258,24 +272,35 @@
       ctx.shadowColor='rgba(96,165,250,0.8)'; ctx.shadowBlur=15; ctx.fillStyle='#e0e7ff'; ctx.font='800 50px Inter, Arial';
       ctx.fillText('GIURO', BASE_W/2, badgeY-15); ctx.font='800 42px Inter, Arial'; ctx.fillText('PUBBLICAMENTE', BASE_W/2, badgeY+35); ctx.shadowBlur=0;
 
-      ctx.fillStyle='rgba(200,215,240,0.8)'; ctx.font='600 34px Inter, Arial'; ctx.textAlign='right'; ctx.fillText('@nicholasrubini', BASE_W-80, 1840);
+      // --- MICRO-CTA & HANDLE (1B) nella SAFE AREA (2A) ---
+      const hashtagY = Math.min(SAFE_BOTTOM - 60, badgeY + hex + 40); // sopra l'ultima riga UI IG
+      const handleY  = Math.min(SAFE_BOTTOM - 20, hashtagY + 30);
 
-      ctx.fillStyle=metal; ctx.fillRect(0, BASE_H-10, BASE_W, 10); ctx.fillStyle='#3b82f6'; ctx.fillRect(0, BASE_H-14, BASE_W, 4);
+      // Hashtag a sinistra
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(156, 163, 175, 0.95)'; // slate-400
+      ctx.font = '600 28px Inter, Arial';
+      ctx.fillText('#PattoDiFerro', 80, hashtagY);
 
-      // Downsample a 1080×1920 se abbiamo usato retina
-      if (s !== 1){
-        canvas.width = BASE_W; canvas.height = BASE_H;
-        const cctx = canvas.getContext('2d');
-        cctx.drawImage(off, 0, 0, BASE_W, BASE_H);
-      } else {
-        canvas.width = BASE_W; canvas.height = BASE_H;
-        canvas.getContext('2d').drawImage(off, 0, 0);
-      }
+      // Handle a destra
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(200,215,240,0.9)';
+      ctx.font = '600 30px Inter, Arial';
+      ctx.fillText('@nicholasrubini', BASE_W - 80, handleY);
 
-      // Aggiorna anteprima
+      // Barre bottom (decoro, fuori safe area)
+      ctx.fillStyle=metal; ctx.fillRect(0, BASE_H-10, BASE_W, 10);
+      ctx.fillStyle='#3b82f6'; ctx.fillRect(0, BASE_H-14, BASE_W, 4);
+
+      // Downsample a 1080×1920 se retina
+      canvas.width = BASE_W; canvas.height = BASE_H;
+      canvas.getContext('2d').drawImage(off, 0, 0, BASE_W, BASE_H);
+
+      // Anteprima
       preview.src = canvas.toDataURL('image/png');
       preview.classList.remove('hidden'); placeholder.classList.add('hidden');
-      // comunica altezza al parent (WP) se in iframe
+
+      // Resize iframe (se embeddato)
       if (window.parent !== window) {
         window.parent.postMessage({ type:'resize-iframe', height: document.body.scrollHeight }, '*');
       }
@@ -330,7 +355,6 @@
     saveBtn.addEventListener('click', shareOrDownload);
     copyBtn.addEventListener('click', copyToClipboard);
 
-    // Inizializza
     toggleButtons();
   </script>
 </body>
