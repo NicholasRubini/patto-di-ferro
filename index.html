@@ -10,19 +10,21 @@
   <!-- React 18 UMD -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Babel for JSX (ok on GitHub Pages; for production builds consider precompiling) -->
+  <!-- Babel for JSX (ok su GitHub Pages) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Mobile-first touch target improvements */
-    input, textarea, button { font-size: 16px; } /* prevent iOS zoom-on-focus */
+    /* Mobile-first: evita lo zoom iOS sui campi */
+    input, textarea, button { font-size: 16px; }
+    body { background: #020617; } /* slate-950 */
   </style>
 </head>
-<body class="bg-slate-950 text-white">
+<body class="text-white">
   <div id="root"></div>
 
-  <script type="text/babel">
+  <!-- IMPORTANT: usa i preset, e niente commenti HTML dentro JSX -->
+  <script type="text/babel" data-presets="env,react">
     const { useState, useRef, useEffect } = React;
 
     const STORY_W = 1080;
@@ -71,7 +73,7 @@
         canvas.width = STORY_W;
         canvas.height = STORY_H;
 
-        // ===== Background gradient (deep night blue) =====
+        // Background
         const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
         bg.addColorStop(0, '#0a0e1a');
         bg.addColorStop(0.35, '#0f1d3d');
@@ -80,7 +82,7 @@
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Subtle pattern
+        // Pattern
         ctx.strokeStyle = 'rgba(100, 150, 255, 0.06)';
         ctx.lineWidth = 2;
         const step = 60;
@@ -94,7 +96,7 @@
           }
         }
 
-        // Top chrome lines
+        // Bars
         const metal = ctx.createLinearGradient(0, 0, canvas.width, 0);
         metal.addColorStop(0, 'rgba(192,192,192,0.3)');
         metal.addColorStop(0.5, 'rgba(230,230,250,0.6)');
@@ -113,7 +115,7 @@
         ctx.fillText('PATTO DI FERRO', canvas.width / 2, 220);
         ctx.shadowBlur = 0;
 
-        // Decorative arrows near title
+        // Arrows near title
         ctx.strokeStyle = '#60a5fa';
         ctx.lineWidth = 3;
         ctx.lineCap = 'square';
@@ -126,7 +128,7 @@
         ctx.moveTo(960, 200); ctx.lineTo(940, 220); ctx.lineTo(960, 240);
         ctx.stroke();
 
-        // Divider under title
+        // Divider
         const lineG = ctx.createLinearGradient(290, 0, 790, 0);
         lineG.addColorStop(0, 'rgba(59,130,246,0)');
         lineG.addColorStop(0.5, '#3b82f6');
@@ -134,7 +136,7 @@
         ctx.fillStyle = lineG;
         ctx.fillRect(290, 250, 500, 5);
 
-        // Optional name
+        // Name (optional)
         if (userName.trim()) {
           ctx.shadowColor = 'rgba(59,130,246,0.6)';
           ctx.shadowBlur = 20;
@@ -144,7 +146,7 @@
           ctx.shadowBlur = 0;
         }
 
-        // Goal section
+        // Goal
         ctx.fillStyle = '#60a5fa';
         ctx.font = 'bold 48px Arial';
         ctx.fillText('IL MIO OBIETTIVO:', canvas.width / 2, userName ? 480 : 420);
@@ -177,7 +179,7 @@
         ctx.fillStyle = 'rgba(96,165,250,0.3)';
         ctx.fillRect(240, y + 30, 600, 2);
 
-        // Date box
+        // Date
         const dateObj = new Date(targetDate);
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         const formatted = dateObj.toLocaleDateString('it-IT', options).toUpperCase();
@@ -237,7 +239,7 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Valknut lines
+        // Valknut
         ctx.strokeStyle = 'rgba(96,165,250,0.2)';
         ctx.lineWidth = 3;
         const v = 80;
@@ -276,22 +278,19 @@
         ctx.textAlign = 'right';
         ctx.fillText('@nicholasrubini', canvas.width - 80, 1840);
 
-        // Bottom chrome
+        // Bottom bars
         ctx.fillStyle = metal;
         ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
         ctx.fillStyle = '#3b82f6';
         ctx.fillRect(0, canvas.height - 14, canvas.width, 4);
 
-        // Update preview
         setPreviewUrl(canvas.toDataURL('image/png'));
       };
 
-      // Generate preview live
       useEffect(() => {
         if (goal && targetDate) generateImage();
       }, [goal, targetDate, userName]);
 
-      // Share/Download with iOS-friendly fallback
       const saveImage = () => {
         if (!goal || !targetDate) return;
         generateImage();
@@ -299,32 +298,50 @@
           const canvas = canvasRef.current;
           if (!canvas) return;
 
-          canvas.toBlob(async (blob) => {
-            if (!blob) return;
-            const file = new File([blob], 'patto-di-ferro-instagram-story.png', { type: 'image/png' });
-
-            // Native share if available (best on mobile)
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              try {
-                await navigator.share({ files: [file], title: 'Patto di Ferro' });
-                return;
-              } catch { /* fall through to download */ }
+          const blobSaver = (blob) => {
+            if (!blob) {
+              // Fallback
+              const dataURL = canvas.toDataURL('image/png');
+              const a = document.createElement('a');
+              a.href = dataURL;
+              a.download = 'patto-di-ferro-instagram-story.png';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              return;
             }
+            const file = new File([blob], 'patto-di-ferro-instagram-story.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: 'Patto di Ferro' }).catch(() => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'patto-di-ferro-instagram-story.png';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              });
+            } else {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'patto-di-ferro-instagram-story.png';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            }
+          };
 
-            // Download fallback (desktop & non-supporting mobile)
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'patto-di-ferro-instagram-story.png';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-          }, 'image/png');
+          if (canvas.toBlob) {
+            canvas.toBlob(blobSaver, 'image/png');
+          } else {
+            blobSaver(null);
+          }
         });
       };
 
-      // --- UI (mobile-first) ---
       return (
         <main className="min-h-screen px-4 py-6 sm:px-6 md:px-8">
           <div className="max-w-3xl mx-auto">
@@ -345,7 +362,7 @@
               </p>
             </header>
 
-            {/* Form first on mobile; preview below */}
+            {/* Form */}
             <section className="space-y-5 sm:space-y-6 bg-slate-900/60 backdrop-blur border border-blue-900/30 rounded-lg p-4 sm:p-6 shadow-xl shadow-blue-900/20">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-blue-400 mb-2">
@@ -403,15 +420,15 @@
               </button>
             </section>
 
-            {/* Preview */}
+            {/* Anteprima */}
             <section className="mt-6 sm:mt-8">
               <h2 className="text-center text-lg font-semibold text-slate-200 mb-3">
                 Anteprima
               </h2>
 
-              <!-- Aspect-ratio box without relying on CSS aspect-ratio (works on older mobiles) -->
+              {/* Box a rapporto 9:16 senza reliance su aspect-ratio */}
               <div className="relative w-full max-w-sm mx-auto">
-                <div className="pt-[177.78%]"></div> <!-- 9/16 -->
+                <div className="pt-[177.78%]"></div> {/* 9/16 */}
                 <canvas ref={canvasRef} className="hidden"></canvas>
 
                 {previewUrl ? (
@@ -434,7 +451,7 @@
               </div>
             </section>
 
-            {/* Small brand line, no external CTA */}
+            {/* Byline, niente CTA esterna */}
             <footer className="mt-8 text-center text-xs text-slate-500">
               by <span className="text-blue-400 font-semibold">NicholasRubini.it</span>
             </footer>
