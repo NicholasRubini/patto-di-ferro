@@ -2,466 +2,393 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Patto di Ferro</title>
-  <!-- React 18 UMD -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Babel for JSX (ok su GitHub Pages) -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Tailwind CDN -->
+  <!-- Solo Tailwind per lo stile -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Mobile-first: evita lo zoom iOS sui campi */
+    /* Mobile-first: evita lo zoom automatico iOS sui form */
     input, textarea, button { font-size: 16px; }
     body { background: #020617; } /* slate-950 */
   </style>
 </head>
 <body class="text-white">
-  <div id="root"></div>
+  <main class="min-h-screen px-4 py-6 sm:px-6 md:px-8">
+    <div class="max-w-3xl mx-auto">
+      <!-- Header -->
+      <header class="text-center mb-6 sm:mb-8">
+        <div class="flex items-center justify-center gap-2 sm:gap-3 mb-3">
+          <!-- Zap left -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-200 via-blue-200 to-slate-300 bg-clip-text text-transparent">
+            PATTO DI FERRO
+          </h1>
+          <!-- Zap right -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto">
+          Dichiara il tuo obiettivo di performance. Niente scuse. Solo risultati.
+        </p>
+        <p class="mt-2 text-xs text-slate-400">
+          L’immagine è già nel formato Instagram Stories (1080×1920).
+        </p>
+      </header>
 
-  <!-- IMPORTANT: usa i preset, e niente commenti HTML dentro JSX -->
-  <script type="text/babel" data-presets="env,react">
-    const { useState, useRef, useEffect } = React;
+      <!-- Form -->
+      <section class="space-y-5 sm:space-y-6 bg-slate-900/60 backdrop-blur border border-blue-900/30 rounded-lg p-4 sm:p-6 shadow-xl shadow-blue-900/20">
+        <div>
+          <label for="name" class="block text-sm font-semibold text-blue-400 mb-2">Il tuo nome (opzionale)</label>
+          <input id="name" type="text" placeholder="Es: Marco Rossi"
+                 class="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                 autocomplete="name" inputmode="text" />
+        </div>
 
-    const STORY_W = 1080;
-    const STORY_H = 1920;
+        <div>
+          <label for="goal" class="block text-sm font-semibold text-blue-400 mb-2">Il tuo obiettivo di performance *</label>
+          <textarea id="goal" rows="4"
+                    placeholder="Es: Deadlift 200kg • Correre 10km sotto i 45 min • 20 pull-up di fila"
+                    class="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"
+                    required></textarea>
+        </div>
 
-    const DownloadIcon = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-           aria-hidden="true">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-    );
+        <div>
+          <label for="date" class="block text-sm font-semibold text-blue-400 mb-2">Data obiettivo *</label>
+          <input id="date" type="date"
+                 class="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                 required />
+        </div>
 
-    const TargetIcon = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-           aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <circle cx="12" cy="12" r="6"></circle>
-        <circle cx="12" cy="12" r="2"></circle>
-      </svg>
-    );
+        <button id="saveBtn"
+                class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white font-bold py-3 sm:py-3.5 rounded-lg transition-all transform active:scale-[0.99] shadow-lg shadow-blue-900/50 disabled:shadow-none"
+                disabled>
+          <!-- Download icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span class="text-base">Scarica / Condividi</span>
+        </button>
+      </section>
 
-    const ZapIcon = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-           aria-hidden="true">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-      </svg>
-    );
+      <!-- Anteprima -->
+      <section class="mt-6 sm:mt-8">
+        <h2 class="text-center text-lg font-semibold text-slate-200 mb-3">Anteprima</h2>
+        <!-- Box 9:16 compatibile anche con device vecchi -->
+        <div class="relative w-full max-w-sm mx-auto">
+          <div class="pt-[177.78%]"></div> <!-- 9/16 -->
+          <canvas id="c" class="hidden"></canvas>
 
-    function App() {
-      const [goal, setGoal] = useState('');
-      const [targetDate, setTargetDate] = useState('');
-      const [userName, setUserName] = useState('');
-      const [previewUrl, setPreviewUrl] = useState('');
-      const canvasRef = useRef(null);
+          <img id="preview" alt="Anteprima immagine Patto di Ferro"
+               class="absolute inset-0 w-full h-full object-cover border-2 border-blue-900/50 rounded-lg shadow-2xl shadow-blue-900/30 hidden" />
 
-      const generateImage = () => {
-        const canvas = canvasRef.current;
-        if (!canvas || !goal || !targetDate) return;
-
-        const ctx = canvas.getContext('2d');
-        canvas.width = STORY_W;
-        canvas.height = STORY_H;
-
-        // Background
-        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        bg.addColorStop(0, '#0a0e1a');
-        bg.addColorStop(0.35, '#0f1d3d');
-        bg.addColorStop(0.7, '#1a2642');
-        bg.addColorStop(1, '#050810');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Pattern
-        ctx.strokeStyle = 'rgba(100, 150, 255, 0.06)';
-        ctx.lineWidth = 2;
-        const step = 60;
-        for (let y = 0; y < canvas.height; y += step) {
-          for (let x = 0; x < canvas.width; x += step * 2) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + step, y + step / 2);
-            ctx.lineTo(x, y + step);
-            ctx.stroke();
-          }
-        }
-
-        // Bars
-        const metal = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        metal.addColorStop(0, 'rgba(192,192,192,0.3)');
-        metal.addColorStop(0.5, 'rgba(230,230,250,0.6)');
-        metal.addColorStop(1, 'rgba(192,192,192,0.3)');
-        ctx.fillStyle = metal;
-        ctx.fillRect(0, 0, canvas.width, 10);
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(0, 10, canvas.width, 4);
-
-        // Title
-        ctx.shadowColor = 'rgba(59,130,246,0.8)';
-        ctx.shadowBlur = 30;
-        ctx.fillStyle = '#e6e6fa';
-        ctx.font = 'bold 90px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('PATTO DI FERRO', canvas.width / 2, 220);
-        ctx.shadowBlur = 0;
-
-        // Arrows near title
-        ctx.strokeStyle = '#60a5fa';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'square';
-        ctx.beginPath();
-        ctx.moveTo(120, 200); ctx.lineTo(120, 240);
-        ctx.moveTo(105, 210); ctx.lineTo(120, 200); ctx.lineTo(135, 210);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(940, 200); ctx.lineTo(960, 220); ctx.lineTo(940, 240);
-        ctx.moveTo(960, 200); ctx.lineTo(940, 220); ctx.lineTo(960, 240);
-        ctx.stroke();
-
-        // Divider
-        const lineG = ctx.createLinearGradient(290, 0, 790, 0);
-        lineG.addColorStop(0, 'rgba(59,130,246,0)');
-        lineG.addColorStop(0.5, '#3b82f6');
-        lineG.addColorStop(1, 'rgba(59,130,246,0)');
-        ctx.fillStyle = lineG;
-        ctx.fillRect(290, 250, 500, 5);
-
-        // Name (optional)
-        if (userName.trim()) {
-          ctx.shadowColor = 'rgba(59,130,246,0.6)';
-          ctx.shadowBlur = 20;
-          ctx.fillStyle = '#a5b4fc';
-          ctx.font = 'bold 52px Arial';
-          ctx.fillText(userName.toUpperCase(), canvas.width / 2, 360);
-          ctx.shadowBlur = 0;
-        }
-
-        // Goal
-        ctx.fillStyle = '#60a5fa';
-        ctx.font = 'bold 48px Arial';
-        ctx.fillText('IL MIO OBIETTIVO:', canvas.width / 2, userName ? 480 : 420);
-        ctx.fillStyle = 'rgba(96,165,250,0.3)';
-        ctx.fillRect(240, userName ? 505 : 445, 600, 2);
-
-        ctx.shadowColor = 'rgba(230,230,250,0.5)';
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = '#f1f5f9';
-        ctx.font = 'bold 75px Arial';
-        const maxWidth = 900;
-        const words = goal.split(' ');
-        let line = '';
-        let y = userName ? 610 : 550;
-        const lh = 95;
-        words.forEach((w, i) => {
-          const test = line + w + ' ';
-          const m = ctx.measureText(test);
-          if (m.width > maxWidth && i > 0) {
-            ctx.fillText(line, canvas.width / 2, y);
-            line = w + ' ';
-            y += lh;
-          } else {
-            line = test;
-          }
-        });
-        ctx.fillText(line, canvas.width / 2, y);
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = 'rgba(96,165,250,0.3)';
-        ctx.fillRect(240, y + 30, 600, 2);
-
-        // Date
-        const dateObj = new Date(targetDate);
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        const formatted = dateObj.toLocaleDateString('it-IT', options).toUpperCase();
-
-        const boxY = y + 120;
-        const boxH = 220;
-        const boxG = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
-        boxG.addColorStop(0, 'rgba(30,58,138,0.4)');
-        boxG.addColorStop(1, 'rgba(30,64,175,0.2)');
-        ctx.fillStyle = boxG;
-        ctx.fillRect(190, boxY, 700, boxH);
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(190, boxY, 700, boxH);
-
-        ctx.fillStyle = '#60a5fa';
-        ctx.font = 'bold 45px Arial';
-        ctx.fillText('ENTRO IL:', canvas.width / 2, boxY + 75);
-
-        ctx.shadowColor = 'rgba(96,165,250,0.8)';
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = '#e0e7ff';
-        ctx.font = 'bold 62px Arial';
-        ctx.fillText(formatted, canvas.width / 2, boxY + 155);
-        ctx.shadowBlur = 0;
-
-        // Badge
-        const badgeY = 1580;
-        const hex = 140;
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (Math.PI / 3) * i;
-          const x = canvas.width / 2 + hex * Math.cos(a);
-          const yy = badgeY + hex * Math.sin(a);
-          i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
-        }
-        ctx.closePath();
-        const hexG = ctx.createRadialGradient(canvas.width / 2, badgeY, 0, canvas.width / 2, badgeY, hex);
-        hexG.addColorStop(0, 'rgba(30,58,138,0.6)');
-        hexG.addColorStop(1, 'rgba(15,23,42,0.8)');
-        ctx.fillStyle = hexG;
-        ctx.fill();
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 5;
-        ctx.stroke();
-
-        // Inner hex
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (Math.PI / 3) * i;
-          const x = canvas.width / 2 + (hex - 20) * Math.cos(a);
-          const yy = badgeY + (hex - 20) * Math.sin(a);
-          i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = '#60a5fa';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Valknut
-        ctx.strokeStyle = 'rgba(96,165,250,0.2)';
-        ctx.lineWidth = 3;
-        const v = 80;
-        const vy = badgeY;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width/2 - v/2, vy + v/3);
-        ctx.lineTo(canvas.width/2, vy - v/2);
-        ctx.lineTo(canvas.width/2 + v/2, vy + v/3);
-        ctx.closePath(); ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(canvas.width/2 - v/3, vy - v/4);
-        ctx.lineTo(canvas.width/2 - v/1.5, vy + v/2.5);
-        ctx.lineTo(canvas.width/2, vy + v/4);
-        ctx.closePath(); ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(canvas.width/2 + v/3, vy - v/4);
-        ctx.lineTo(canvas.width/2 + v/1.5, vy + v/2.5);
-        ctx.lineTo(canvas.width/2, vy + v/4);
-        ctx.closePath(); ctx.stroke();
-
-        // Badge text
-        ctx.shadowColor = 'rgba(96,165,250,0.8)';
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = '#e0e7ff';
-        ctx.font = 'bold 50px Arial';
-        ctx.fillText('GIURO', canvas.width / 2, badgeY - 15);
-        ctx.font = 'bold 42px Arial';
-        ctx.fillText('PUBBLICAMENTE', canvas.width / 2, badgeY + 35);
-        ctx.shadowBlur = 0;
-
-        // Handle
-        ctx.fillStyle = 'rgba(200,215,240,0.8)';
-        ctx.font = '34px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText('@nicholasrubini', canvas.width - 80, 1840);
-
-        // Bottom bars
-        ctx.fillStyle = metal;
-        ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillRect(0, canvas.height - 14, canvas.width, 4);
-
-        setPreviewUrl(canvas.toDataURL('image/png'));
-      };
-
-      useEffect(() => {
-        if (goal && targetDate) generateImage();
-      }, [goal, targetDate, userName]);
-
-      const saveImage = () => {
-        if (!goal || !targetDate) return;
-        generateImage();
-        requestAnimationFrame(() => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
-
-          const blobSaver = (blob) => {
-            if (!blob) {
-              // Fallback
-              const dataURL = canvas.toDataURL('image/png');
-              const a = document.createElement('a');
-              a.href = dataURL;
-              a.download = 'patto-di-ferro-instagram-story.png';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              return;
-            }
-            const file = new File([blob], 'patto-di-ferro-instagram-story.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              navigator.share({ files: [file], title: 'Patto di Ferro' }).catch(() => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'patto-di-ferro-instagram-story.png';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-              });
-            } else {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'patto-di-ferro-instagram-story.png';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              URL.revokeObjectURL(url);
-            }
-          };
-
-          if (canvas.toBlob) {
-            canvas.toBlob(blobSaver, 'image/png');
-          } else {
-            blobSaver(null);
-          }
-        });
-      };
-
-      return (
-        <main className="min-h-screen px-4 py-6 sm:px-6 md:px-8">
-          <div className="max-w-3xl mx-auto">
-            {/* Header */}
-            <header className="text-center mb-6 sm:mb-8">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3">
-                <ZapIcon />
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-200 via-blue-200 to-slate-300 bg-clip-text text-transparent">
-                  PATTO DI FERRO
-                </h1>
-                <ZapIcon />
-              </div>
-              <p className="text-slate-300 text-base sm:text-lg max-w-xl mx-auto">
-                Dichiara il tuo obiettivo di performance. Niente scuse. Solo risultati.
-              </p>
-              <p className="mt-2 text-xs text-slate-400">
-                L’immagine è già nel formato Instagram Stories (1080×1920).
-              </p>
-            </header>
-
-            {/* Form */}
-            <section className="space-y-5 sm:space-y-6 bg-slate-900/60 backdrop-blur border border-blue-900/30 rounded-lg p-4 sm:p-6 shadow-xl shadow-blue-900/20">
-              <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-blue-400 mb-2">
-                  Il tuo nome (opzionale)
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  placeholder="Es: Marco Rossi"
-                  className="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                  autoComplete="name"
-                  inputMode="text"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="goal" className="block text-sm font-semibold text-blue-400 mb-2">
-                  Il tuo obiettivo di performance *
-                </label>
-                <textarea
-                  id="goal"
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                  placeholder="Es: Deadlift 200kg • Correre 10km sotto i 45 min • 20 pull-up di fila"
-                  rows="4"
-                  className="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="date" className="block text-sm font-semibold text-blue-400 mb-2">
-                  Data obiettivo *
-                </label>
-                <input
-                  id="date"
-                  type="date"
-                  value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-blue-900/50 rounded-md px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                  required
-                />
-              </div>
-
-              <button
-                onClick={saveImage}
-                disabled={!goal || !targetDate}
-                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white font-bold py-3 sm:py-3.5 rounded-lg transition-all transform active:scale-[0.99] shadow-lg shadow-blue-900/50 disabled:shadow-none"
-                aria-disabled={!goal || !targetDate}
-              >
-                <DownloadIcon />
-                <span className="text-base">Scarica / Condividi</span>
-              </button>
-            </section>
-
-            {/* Anteprima */}
-            <section className="mt-6 sm:mt-8">
-              <h2 className="text-center text-lg font-semibold text-slate-200 mb-3">
-                Anteprima
-              </h2>
-
-              {/* Box a rapporto 9:16 senza reliance su aspect-ratio */}
-              <div className="relative w-full max-w-sm mx-auto">
-                <div className="pt-[177.78%]"></div> {/* 9/16 */}
-                <canvas ref={canvasRef} className="hidden"></canvas>
-
-                {previewUrl ? (
-                  <img
-                    src={previewUrl}
-                    alt="Anteprima immagine Patto di Ferro"
-                    className="absolute inset-0 w-full h-full object-cover border-2 border-blue-900/50 rounded-lg shadow-2xl shadow-blue-900/30"
-                    loading="eager"
-                  />
-                ) : (
-                  <div
-                    className="absolute inset-0 w-full h-full bg-slate-950/80 border-2 border-blue-900/50 rounded-lg flex items-center justify-center shadow-2xl"
-                    aria-live="polite"
-                  >
-                    <p className="text-slate-400 text-center px-4">
-                      Compila i campi per vedere l'anteprima
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Byline, niente CTA esterna */}
-            <footer className="mt-8 text-center text-xs text-slate-500">
-              by <span className="text-blue-400 font-semibold">NicholasRubini.it</span>
-            </footer>
+          <div id="placeholder"
+               class="absolute inset-0 w-full h-full bg-slate-950/80 border-2 border-blue-900/50 rounded-lg flex items-center justify-center shadow-2xl">
+            <p class="text-slate-400 text-center px-4">
+              Compila i campi per vedere l'anteprima
+            </p>
           </div>
-        </main>
-      );
+        </div>
+      </section>
+
+      <footer class="mt-8 text-center text-xs text-slate-500">
+        by <span class="text-blue-400 font-semibold">NicholasRubini.it</span>
+      </footer>
+    </div>
+  </main>
+
+  <noscript>
+    <div style="color:#fff; padding:16px; text-align:center;">
+      Attiva JavaScript per utilizzare questo strumento.
+    </div>
+  </noscript>
+
+  <script>
+    // ------ Stato -------
+    const STORY_W = 1080, STORY_H = 1920;
+    const nameEl = document.getElementById('name');
+    const goalEl = document.getElementById('goal');
+    const dateEl = document.getElementById('date');
+    const saveBtn = document.getElementById('saveBtn');
+    const canvas = document.getElementById('c');
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('placeholder');
+
+    let userName = '', goal = '', targetDate = '';
+    function canGenerate() { return goal.trim() && targetDate; }
+
+    // ------ Disegno immagine su canvas -------
+    function generateImage() {
+      if (!canGenerate()) return;
+
+      const ctx = canvas.getContext('2d');
+      canvas.width = STORY_W;
+      canvas.height = STORY_H;
+
+      // BG gradiente
+      const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bg.addColorStop(0, '#0a0e1a');
+      bg.addColorStop(0.35, '#0f1d3d');
+      bg.addColorStop(0.7, '#1a2642');
+      bg.addColorStop(1, '#050810');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Pattern
+      ctx.strokeStyle = 'rgba(100, 150, 255, 0.06)';
+      ctx.lineWidth = 2;
+      const step = 60;
+      for (let y = 0; y < canvas.height; y += step) {
+        for (let x = 0; x < canvas.width; x += step * 2) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + step, y + step / 2);
+          ctx.lineTo(x, y + step);
+          ctx.stroke();
+        }
+      }
+
+      // Barre top
+      const metal = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      metal.addColorStop(0, 'rgba(192,192,192,0.3)');
+      metal.addColorStop(0.5, 'rgba(230,230,250,0.6)');
+      metal.addColorStop(1, 'rgba(192,192,192,0.3)');
+      ctx.fillStyle = metal;
+      ctx.fillRect(0, 0, canvas.width, 10);
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(0, 10, canvas.width, 4);
+
+      // Titolo
+      ctx.shadowColor = 'rgba(59,130,246,0.8)';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#e6e6fa';
+      ctx.font = 'bold 90px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('PATTO DI FERRO', canvas.width / 2, 220);
+      ctx.shadowBlur = 0;
+
+      // Frecce
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'square';
+      ctx.beginPath();
+      ctx.moveTo(120, 200); ctx.lineTo(120, 240);
+      ctx.moveTo(105, 210); ctx.lineTo(120, 200); ctx.lineTo(135, 210);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(940, 200); ctx.lineTo(960, 220); ctx.lineTo(940, 240);
+      ctx.moveTo(960, 200); ctx.lineTo(940, 220); ctx.lineTo(960, 240);
+      ctx.stroke();
+
+      // Divisorio
+      const lineG = ctx.createLinearGradient(290, 0, 790, 0);
+      lineG.addColorStop(0, 'rgba(59,130,246,0)');
+      lineG.addColorStop(0.5, '#3b82f6');
+      lineG.addColorStop(1, 'rgba(59,130,246,0)');
+      ctx.fillStyle = lineG;
+      ctx.fillRect(290, 250, 500, 5);
+
+      // Nome opzionale
+      if (userName.trim()) {
+        ctx.shadowColor = 'rgba(59,130,246,0.6)';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 52px Arial';
+        ctx.fillText(userName.toUpperCase(), canvas.width / 2, 360);
+        ctx.shadowBlur = 0;
+      }
+
+      // Obiettivo
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 48px Arial';
+      ctx.fillText('IL MIO OBIETTIVO:', canvas.width / 2, userName ? 480 : 420);
+      ctx.fillStyle = 'rgba(96,165,250,0.3)';
+      ctx.fillRect(240, userName ? 505 : 445, 600, 2);
+
+      ctx.shadowColor = 'rgba(230,230,250,0.5)';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#f1f5f9';
+      ctx.font = 'bold 75px Arial';
+      const maxWidth = 900;
+      const words = goal.trim().split(/\s+/);
+      let line = '';
+      let y = userName ? 610 : 550;
+      const lh = 95;
+      words.forEach((w, i) => {
+        const test = line + w + ' ';
+        const m = ctx.measureText(test);
+        if (m.width > maxWidth && i > 0) {
+          ctx.fillText(line, canvas.width / 2, y);
+          line = w + ' ';
+          y += lh;
+        } else {
+          line = test;
+        }
+      });
+      ctx.fillText(line, canvas.width / 2, y);
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = 'rgba(96,165,250,0.3)';
+      ctx.fillRect(240, y + 30, 600, 2);
+
+      // Data
+      const d = new Date(targetDate);
+      const formatted = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+
+      const boxY = y + 120;
+      const boxH = 220;
+      const boxG = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
+      boxG.addColorStop(0, 'rgba(30,58,138,0.4)');
+      boxG.addColorStop(1, 'rgba(30,64,175,0.2)');
+      ctx.fillStyle = boxG;
+      ctx.fillRect(190, boxY, 700, boxH);
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(190, boxY, 700, boxH);
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 45px Arial';
+      ctx.fillText('ENTRO IL:', canvas.width / 2, boxY + 75);
+
+      ctx.shadowColor = 'rgba(96,165,250,0.8)';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#e0e7ff';
+      ctx.font = 'bold 62px Arial';
+      ctx.fillText(formatted, canvas.width / 2, boxY + 155);
+      ctx.shadowBlur = 0;
+
+      // Badge
+      const badgeY = 1580, hex = 140;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        const x = canvas.width / 2 + hex * Math.cos(a);
+        const yy = badgeY + hex * Math.sin(a);
+        i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+      }
+      ctx.closePath();
+      const hexG = ctx.createRadialGradient(canvas.width / 2, badgeY, 0, canvas.width / 2, badgeY, hex);
+      hexG.addColorStop(0, 'rgba(30,58,138,0.6)');
+      hexG.addColorStop(1, 'rgba(15,23,42,0.8)');
+      ctx.fillStyle = hexG;
+      ctx.fill();
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      // Inner hex
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        const x = canvas.width / 2 + (hex - 20) * Math.cos(a);
+        const yy = badgeY + (hex - 20) * Math.sin(a);
+        i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Valknut
+      ctx.strokeStyle = 'rgba(96,165,250,0.2)';
+      ctx.lineWidth = 3;
+      const v = 80, vy = badgeY;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2 - v/2, vy + v/3);
+      ctx.lineTo(canvas.width/2, vy - v/2);
+      ctx.lineTo(canvas.width/2 + v/2, vy + v/3);
+      ctx.closePath(); ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2 - v/3, vy - v/4);
+      ctx.lineTo(canvas.width/2 - v/1.5, vy + v/2.5);
+      ctx.lineTo(canvas.width/2, vy + v/4);
+      ctx.closePath(); ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2 + v/3, vy - v/4);
+      ctx.lineTo(canvas.width/2 + v/1.5, vy + v/2.5);
+      ctx.lineTo(canvas.width/2, vy + v/4);
+      ctx.closePath(); ctx.stroke();
+
+      // Testo badge
+      ctx.shadowColor = 'rgba(96,165,250,0.8)';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#e0e7ff';
+      ctx.font = 'bold 50px Arial';
+      ctx.fillText('GIURO', canvas.width / 2, badgeY - 15);
+      ctx.font = 'bold 42px Arial';
+      ctx.fillText('PUBBLICAMENTE', canvas.width / 2, badgeY + 35);
+      ctx.shadowBlur = 0;
+
+      // Handle
+      ctx.fillStyle = 'rgba(200,215,240,0.8)';
+      ctx.font = '34px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText('@nicholasrubini', canvas.width - 80, 1840);
+
+      // Barre bottom
+      ctx.fillStyle = metal;
+      ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(0, canvas.height - 14, canvas.width, 4);
+
+      // Aggiorna anteprima
+      preview.src = canvas.toDataURL('image/png');
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    // ------ Share/Download ------
+    function saveImage() {
+      if (!canGenerate()) return;
+      // Mantieni il gesto utente con RAF
+      requestAnimationFrame(() => {
+        if (canvas.toBlob) {
+          canvas.toBlob(async (blob) => {
+            if (!blob) return;
+            const file = new File([blob], 'patto-di-ferro-instagram-story.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              try { await navigator.share({ files: [file], title: 'Patto di Ferro' }); return; }
+              catch (e) { /* fallback sotto */ }
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'patto-di-ferro-instagram-story.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        } else {
+          // Fallback legacy
+          const dataURL = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = dataURL;
+          a.download = 'patto-di-ferro-instagram-story.png';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+      });
+    }
+
+    // ------ Eventi -------
+    nameEl.addEventListener('input', (e) => { userName = e.target.value || ''; if (canGenerate()) generateImage(); });
+    goalEl.addEventListener('input', (e) => { goal = e.target.value || ''; toggleBtn(); if (canGenerate()) generateImage(); });
+    dateEl.addEventListener('input', (e) => { targetDate = e.target.value || ''; toggleBtn(); if (canGenerate()) generateImage(); });
+    saveBtn.addEventListener('click', saveImage);
+
+    function toggleBtn() {
+      saveBtn.disabled = !canGenerate();
+    }
   </script>
 </body>
 </html>
